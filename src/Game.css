@@ -8,4 +8,5 @@
 .Cell {
     background: #ccc;
     position: absolute;
+    background-image: radial-gradient(silver, gray)
 }
