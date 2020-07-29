@@ -1,14 +1,9 @@
 import React from "react";
 import "./Game.css";
 
-const WIDTH = 900;
-const HEIGHT = 600;
 const MAX_HEIGHT = 600
 
 class Cell extends React.Component {
-  constructor() {
-    super();
-  }
   render() {
     const { x, y } = this.props;
     return (
@@ -165,6 +160,8 @@ class Game extends React.Component {
             y1 = this.state.rows -y1 -1;
           }
           break;
+        default:
+          break;
       }
       // Adjust y-axis topology:
       switch(this.state.topology){
@@ -187,9 +184,11 @@ class Game extends React.Component {
             x1 = this.state.rows -x1 -1;
           }
           break;
+        default:
+          break;
       }
       if(x1 >= 0 && y1 >= 0 && x1 < this.state.cols && y1 < this.state.rows) {
-        if (board[y1][x1]==true){
+        if (board[y1][x1]===true){
           neighbors++;
         }
       }
