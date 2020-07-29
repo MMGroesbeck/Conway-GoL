@@ -1,14 +1,9 @@
 import React from "react";
 import "./Game.css";
 
-const WIDTH = 900;
-const HEIGHT = 600;
 const MAX_HEIGHT = 600
 
 class Cell extends React.Component {
-  constructor() {
-    super();
-  }
   render() {
     const { x, y } = this.props;
     return (
@@ -112,7 +107,6 @@ class Game extends React.Component {
       for (let x = 0; x < this.state.cols; x++) {
         let neighbors = await this.calculateNeighbors(this.state.board, x, y);
         if (this.state.board[y][x]) {
-          console.log("x: ", x, "y: ", y, "n: ", neighbors)
           if (neighbors === 2 || neighbors === 3) {
             newBoard[y][x] = true;
           } else {
@@ -166,6 +160,8 @@ class Game extends React.Component {
             y1 = this.state.rows -y1 -1;
           }
           break;
+        default:
+          break;
       }
       // Adjust y-axis topology:
       switch(this.state.topology){
@@ -188,9 +184,11 @@ class Game extends React.Component {
             x1 = this.state.rows -x1 -1;
           }
           break;
+        default:
+          break;
       }
       if(x1 >= 0 && y1 >= 0 && x1 < this.state.cols && y1 < this.state.rows) {
-        if (board[y1][x1]==true){
+        if (board[y1][x1]===true){
           neighbors++;
         }
       }
@@ -208,8 +206,8 @@ class Game extends React.Component {
   handleStepsChange = (event) => {
     this.setState({ steps: event.target.value })
   }
-  handleClear = () => {
-    const newBoard = this.makeEmptyBoard();
+  handleClear = async () => {
+    const newBoard = await this.makeEmptyBoard();
     this.setState({ board: newBoard })
     this.setState({ cells: this.makeCells() });
   };
@@ -235,11 +233,7 @@ class Game extends React.Component {
         board[y][x] = false;
       }
     }
-    console.log("bd: ", board);
     this.setState({ board: board })
-    console.log("Rows: ", this.state.rows);
-    console.log("Cols: ", this.state.cols);
-    console.log("Bd: ", this.state.board);
     this.setState({ cells: this.makeCells() });
   }
   render() {
@@ -265,7 +259,7 @@ class Game extends React.Component {
         <div className="controls">
           Speed:{" "}
           <input
-            value={1000/this.state.interval}
+            value={Math.round(1000/this.state.interval)}
             onChange={this.handleIntervalChange}
           />{" "}
           generations per second
