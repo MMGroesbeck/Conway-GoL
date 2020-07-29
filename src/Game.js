@@ -1,15 +1,13 @@
 import React from "react";
 import "./Game.css";
 
-const CELL_SIZE = 15;
 const WIDTH = 900;
 const HEIGHT = 600;
 const MAX_HEIGHT = 600
 
 class Cell extends React.Component {
-  constructor(cell_size=15) {
+  constructor() {
     super();
-    this.cell_size = cell_size
   }
   render() {
     const { x, y } = this.props;
@@ -17,10 +15,10 @@ class Cell extends React.Component {
       <div
         className="Cell"
         style={{
-          left: `${CELL_SIZE * x + 1}px`,
-          top: `${CELL_SIZE * y + 1}px`,
-          width: `${CELL_SIZE - 1}px`,
-          height: `${CELL_SIZE - 1}px`,
+          left: `${this.props.cell_size * x + 1}px`,
+          top: `${this.props.cell_size * y + 1}px`,
+          width: `${this.props.cell_size - 1}px`,
+          height: `${this.props.cell_size - 1}px`,
         }}
       />
     );
@@ -35,13 +33,18 @@ class Game extends React.Component {
     this.board = this.makeEmptyBoard();
   }
   state = {
+    board: this.board,
     cells: [],
     interval: 100,
     steps: 1,
     isRunning: false,
     rows: 40,
     cols: 40,
-    cell_size: (MAX_HEIGHT - (MAX_HEIGHT % this.rows)) / this.rows
+    cell_size: (MAX_HEIGHT - (MAX_HEIGHT % this.rows)) / this.rows,
+    topology: "default",
+    nextTopo: "default",
+    nextRows: 40,
+    nextCols: 40
   };
   makeEmptyBoard() {
     let board = [];
@@ -55,8 +58,8 @@ class Game extends React.Component {
   }
   makeCells() {
     let cells = [];
-    for (let y = 0; y < this.rows; y++) {
-      for (let x = 0; x < this.cols; x++) {
+    for (let y = 0; y < this.state.rows; y++) {
+      for (let x = 0; x < this.state.cols; x++) {
         if (this.board[y][x]) {
           cells.push({ x, y });
         }
@@ -76,9 +79,9 @@ class Game extends React.Component {
     const elemOffset = this.getElementOffset();
     const offsetX = event.clientX - elemOffset.x;
     const offsetY = event.clientY - elemOffset.y;
-    const x = Math.floor(offsetX / this.cell_size);
-    const y = Math.floor(offsetY / this.cell_size);
-    if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
+    const x = Math.floor(offsetX / this.state.cell_size);
+    const y = Math.floor(offsetY / this.state.cell_size);
+    if ((x >= 0) && (x <= this.state.cols) && (y >= 0) && (y <= this.state.rows)) {
       this.board[y][x] = !this.board[y][x];
     }
     this.setState({ cells: this.makeCells() });
@@ -103,10 +106,11 @@ class Game extends React.Component {
   }
   oneStep() {
     let newBoard = this.makeEmptyBoard();
-    for (let y = 0; y < this.rows; y++) {
-      for (let x = 0; x < this.cols; x++) {
+    for (let y = 0; y < this.state.rows; y++) {
+      for (let x = 0; x < this.state.cols; x++) {
         let neighbors = this.calculateNeighbors(this.board, x, y);
         if (this.board[y][x]) {
+          console.log("x: ", x, "y: ", y, "n: ", neighbors)
           if (neighbors === 2 || neighbors === 3) {
             newBoard[y][x] = true;
           } else {
@@ -134,21 +138,61 @@ class Game extends React.Component {
       [1, -1],
       [0, -1],
     ];
-    for (let i = 0; i < dirs.length; i++) {
-      const dir = dirs[i];
-      let y1 = y + dir[0];
-      let x1 = x + dir[1];
-
-      if (
-        x1 >= 0 &&
-        x1 < this.cols &&
-        y1 >= 0 &&
-        y1 < this.rows &&
-        board[y1][x1]
-      ) {
-        neighbors++;
+    dirs.forEach(coord => {
+      let y1 = y + coord[0]
+      let x1 = x + coord[1]
+      // Adjust x-axis topology:
+      switch(this.state.topology){
+        case "cylinder":
+        case "torus":
+        case "klein":
+          if (x1<0){
+            x1 = this.state.cols - 1;
+          }
+          if (x1>=this.state.cols) {
+            x1 = 0;
+          }
+          break;
+        case "mobius":
+        case "rpp":
+          if (x1<0){
+            x1 = this.state.cols -1;
+            y1 = this.state.rows - y1 -1;
+          }
+          if (x1>=this.state.cols) {
+            x1 = 0;
+            y1 = this.state.rows -y1 -1;
+          }
+          break;
       }
-    }
+      // Adjust y-axis topology:
+      switch(this.state.topology){
+        case "torus":
+          if (y1<0){
+            y1 = this.state.rows - 1;
+          }
+          if (y1>=this.state.rows) {
+            y1 = 0;
+          }
+          break;
+        case "klein":
+        case "rpp":
+          if (y1<0){
+            y1 = this.state.rows -1;
+            x1 = this.state.cols - x1 -1;
+          }
+          if (y1>=this.state.rows) {
+            y1 = 0;
+            x1 = this.state.rows -x1 -1;
+          }
+          break;
+      }
+      if(x1 >= 0 && y1 >= 0 && x1 < this.state.cols && y1 < this.state.rows) {
+        if (board[y1][x1]==true){
+          neighbors++;
+        }
+      }
+    })
     return neighbors;
   }
   takeSteps = () => {
@@ -166,6 +210,32 @@ class Game extends React.Component {
     this.board = this.makeEmptyBoard();
     this.setState({ cells: this.makeCells() });
   };
+  handleTopoChange = (event) => {
+    this.setState({ nextTopo: event.target.value})
+  }
+  handleRowsChange = (event) => {
+    this.setState({ nextRows: event.target.value})
+  }
+  handleColsChange = (event) => {
+    this.setState({ nextCols: event.target.value})
+  }
+  newBoard = () => {
+    this.setState({
+      topology: this.state.nextTopo,
+      rows: this.state.nextRows,
+      cols: ["default", "cylinder", "mobius", "torus"].indexOf(this.state.nextTopo) >= 0 ? this.state.nextCols : this.state.nextRows,
+      cell_size: (MAX_HEIGHT - (MAX_HEIGHT % this.state.nextRows)) / this.state.nextRows });
+    let board = []
+    for (let y = 0; y < this.state.rows; y++) {
+      board[y] = [];
+      for (let x = 0; x < this.state.cols; x++) {
+        board[y][x] = false;
+      }
+    }
+    this.board = board;
+    this.setState({ cells: this.makeCells() });
+    console.log(this.board);
+  }
   render() {
     const { cells } = this.state;
     return (
@@ -173,9 +243,9 @@ class Game extends React.Component {
         <div
           className="Board"
           style={{
-            width: WIDTH,
-            height: HEIGHT,
-            backgroundSize: `${this.cell_size}px ${this.cell_size}px`,
+            width: this.state.cell_size * this.state.cols,
+            height: this.state.cell_size * this.state.rows,
+            backgroundSize: `${this.state.cell_size}px ${this.state.cell_size}px`,
           }}
           onClick={this.handleClick}
           ref={(n) => {
@@ -183,7 +253,7 @@ class Game extends React.Component {
           }}
         >
           {cells.map((cell) => (
-            <Cell x={cell.x} y={cell.y} key={`${cell.x},${cell.y}`} />
+            <Cell cell_size={this.state.cell_size} x={cell.x} y={cell.y} key={`${cell.x},${cell.y}`} />
           ))}
         </div>
         <div className="controls">
@@ -216,6 +286,66 @@ class Game extends React.Component {
           steps:
           <button className="button" onClick={this.takeSteps}>
             Go
+          </button>
+        </div>
+        <div className="controls">
+          Topology:
+          <form>
+            <div className="radio">
+              <label>
+                <input type="radio" value="default" checked={this.state.nextTopo === "default"}
+                  onChange={this.handleTopoChange} />
+                default
+              </label>
+            </div>
+            <div className="radio">
+              <label>
+                <input type="radio" value="cylinder" checked={this.state.nextTopo === "cylinder"}
+                  onChange={this.handleTopoChange} />
+                cylinder
+              </label>
+            </div>
+            <div className="radio">
+              <label>
+                <input type="radio" value="mobius" checked={this.state.nextTopo === "mobius"} 
+                  onChange={this.handleTopoChange}/>
+                Möbius band
+              </label>
+            </div>
+            <div className="radio">
+              <label>
+                <input type="radio" value="torus" checked={this.state.nextTopo === "torus"} 
+                  onChange={this.handleTopoChange}/>
+                torus
+              </label>
+            </div>
+            <div className="radio">
+              <label>
+                <input type="radio" value="klein" checked={this.state.nextTopo === "klein"} 
+                  onChange={this.handleTopoChange}/>
+                Klein bottle
+              </label>
+            </div>
+            <div className="radio">
+              <label>
+                <input type="radio" value="rpp" checked={this.state.nextTopo === "rpp"} 
+                  onChange={this.handleTopoChange}/>
+                real projective plane
+              </label>
+            </div>
+          </form>
+          Rows:{" "}
+          <input
+            value={this.state.nextRows}
+            onChange={this.handleRowsChange}
+          />
+          Columns:{" "}
+          <input
+            value={this.state.nextCols}
+            onChange={this.handleColsChange}
+          />
+          <button className="button" onClick={this.newBoard}>
+            New board
           </button>
         </div>
       </div>
