@@ -1,11 +1,16 @@
 import React from "react";
 import "./Game.css";
 
-const CELL_SIZE = 20;
-const WIDTH = 800;
+const CELL_SIZE = 15;
+const WIDTH = 900;
 const HEIGHT = 600;
+const MAX_HEIGHT = 600
 
 class Cell extends React.Component {
+  constructor(cell_size=15) {
+    super();
+    this.cell_size = cell_size
+  }
   render() {
     const { x, y } = this.props;
     return (
@@ -24,20 +29,25 @@ class Cell extends React.Component {
 class Game extends React.Component {
   constructor() {
     super();
-    this.rows = HEIGHT / CELL_SIZE;
-    this.cols = WIDTH / CELL_SIZE;
+    this.rows = 40;
+    this.cols = 40;
+    this.cell_size = (MAX_HEIGHT - (MAX_HEIGHT % this.rows)) / this.rows
     this.board = this.makeEmptyBoard();
   }
   state = {
     cells: [],
     interval: 100,
+    steps: 1,
     isRunning: false,
+    rows: 40,
+    cols: 40,
+    cell_size: (MAX_HEIGHT - (MAX_HEIGHT % this.rows)) / this.rows
   };
   makeEmptyBoard() {
     let board = [];
-    for (let y = 0; y < this.rows; y++) {
+    for (let y = 0; y < this.state.rows; y++) {
       board[y] = [];
-      for (let x = 0; x < this.cols; x++) {
+      for (let x = 0; x < this.state.cols; x++) {
         board[y][x] = false;
       }
     }
@@ -66,8 +76,8 @@ class Game extends React.Component {
     const elemOffset = this.getElementOffset();
     const offsetX = event.clientX - elemOffset.x;
     const offsetY = event.clientY - elemOffset.y;
-    const x = Math.floor(offsetX / CELL_SIZE);
-    const y = Math.floor(offsetY / CELL_SIZE);
+    const x = Math.floor(offsetX / this.cell_size);
+    const y = Math.floor(offsetY / this.cell_size);
     if (x >= 0 && x <= this.cols && y >= 0 && y <= this.rows) {
       this.board[y][x] = !this.board[y][x];
     }
@@ -86,6 +96,12 @@ class Game extends React.Component {
   };
   runIteration() {
     console.log("running iteration");
+    this.oneStep();
+    this.timeoutHandler = window.setTimeout(() => {
+      this.runIteration();
+    }, this.state.interval);
+  }
+  oneStep() {
     let newBoard = this.makeEmptyBoard();
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
@@ -105,9 +121,6 @@ class Game extends React.Component {
     }
     this.board = newBoard;
     this.setState({ cells: this.makeCells() });
-    this.timeoutHandler = window.setTimeout(() => {
-      this.runIteration();
-    }, this.state.interval);
   }
   calculateNeighbors(board, x, y) {
     let neighbors = 0;
@@ -138,9 +151,17 @@ class Game extends React.Component {
     }
     return neighbors;
   }
+  takeSteps = () => {
+    for (let i = 0; i < this.state.steps; i++) {
+      this.oneStep()
+    }
+  }
   handleIntervalChange = (event) => {
-    this.setState({ interval: event.target.value });
+    this.setState({ interval: 1000/event.target.value });
   };
+  handleStepsChange = (event) => {
+    this.setState({ steps: event.target.value })
+  }
   handleClear = () => {
     this.board = this.makeEmptyBoard();
     this.setState({ cells: this.makeCells() });
@@ -154,7 +175,7 @@ class Game extends React.Component {
           style={{
             width: WIDTH,
             height: HEIGHT,
-            backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
+            backgroundSize: `${this.cell_size}px ${this.cell_size}px`,
           }}
           onClick={this.handleClick}
           ref={(n) => {
@@ -166,12 +187,12 @@ class Game extends React.Component {
           ))}
         </div>
         <div className="controls">
-          Update every{" "}
+          Speed:{" "}
           <input
-            value={this.state.interval}
+            value={1000/this.state.interval}
             onChange={this.handleIntervalChange}
           />{" "}
-          msec
+          generations per second
           {this.state.isRunning ? (
             <button className="button" onClick={this.stopGame}>
               Stop
@@ -181,6 +202,21 @@ class Game extends React.Component {
               Run
             </button>
           )}
+          <button className="button" onClick={this.handleClear}>
+            Clear
+          </button>
+          <button className="button" onClick={this.oneStep}>
+            Step
+          </button>
+          Take{""}
+          <input
+            value={this.state.steps}
+            onChange={this.handleStepsChange}
+          />
+          steps:
+          <button className="button" onClick={this.takeSteps}>
+            Go
+          </button>
         </div>
       </div>
     );
