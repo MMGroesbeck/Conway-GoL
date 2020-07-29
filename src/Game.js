@@ -195,9 +195,11 @@ class Game extends React.Component {
     })
     return neighbors;
   }
-  takeSteps = () => {
+  takeSteps = async () => {
+    console.log("Planned: ", this.state.steps);
     for (let i = 0; i < this.state.steps; i++) {
-      this.oneStep()
+      console.log(i);
+      await this.oneStep();
     }
   }
   handleIntervalChange = (event) => {
