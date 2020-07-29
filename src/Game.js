@@ -60,7 +60,7 @@ class Game extends React.Component {
     let cells = [];
     for (let y = 0; y < this.state.rows; y++) {
       for (let x = 0; x < this.state.cols; x++) {
-        if (this.board[y][x]) {
+        if (this.state.board[y][x]) {
           cells.push({ x, y });
         }
       }
@@ -82,7 +82,9 @@ class Game extends React.Component {
     const x = Math.floor(offsetX / this.state.cell_size);
     const y = Math.floor(offsetY / this.state.cell_size);
     if ((x >= 0) && (x <= this.state.cols) && (y >= 0) && (y <= this.state.rows)) {
-      this.board[y][x] = !this.board[y][x];
+      let newBoard = [...this.state.board]
+      newBoard[y][x] = !newBoard[y][x];
+      this.setState({ board: newBoard });
     }
     this.setState({ cells: this.makeCells() });
   };
@@ -104,12 +106,12 @@ class Game extends React.Component {
       this.runIteration();
     }, this.state.interval);
   }
-  oneStep() {
+  oneStep = async () => {
     let newBoard = this.makeEmptyBoard();
     for (let y = 0; y < this.state.rows; y++) {
       for (let x = 0; x < this.state.cols; x++) {
-        let neighbors = this.calculateNeighbors(this.board, x, y);
-        if (this.board[y][x]) {
+        let neighbors = await this.calculateNeighbors(this.state.board, x, y);
+        if (this.state.board[y][x]) {
           console.log("x: ", x, "y: ", y, "n: ", neighbors)
           if (neighbors === 2 || neighbors === 3) {
             newBoard[y][x] = true;
@@ -117,13 +119,13 @@ class Game extends React.Component {
             newBoard[y][x] = false;
           }
         } else {
-          if (!this.board[y][x] && neighbors === 3) {
+          if (!this.state.board[y][x] && neighbors === 3) {
             newBoard[y][x] = true;
           }
         }
       }
     }
-    this.board = newBoard;
+    this.setState({ board: newBoard });
     this.setState({ cells: this.makeCells() });
   }
   calculateNeighbors(board, x, y) {
@@ -207,7 +209,8 @@ class Game extends React.Component {
     this.setState({ steps: event.target.value })
   }
   handleClear = () => {
-    this.board = this.makeEmptyBoard();
+    const newBoard = this.makeEmptyBoard();
+    this.setState({ board: newBoard })
     this.setState({ cells: this.makeCells() });
   };
   handleTopoChange = (event) => {
@@ -219,11 +222,11 @@ class Game extends React.Component {
   handleColsChange = (event) => {
     this.setState({ nextCols: event.target.value})
   }
-  newBoard = () => {
-    this.setState({
+  newBoard = async () => {
+    await this.setState({
       topology: this.state.nextTopo,
       rows: this.state.nextRows,
-      cols: ["default", "cylinder", "mobius", "torus"].indexOf(this.state.nextTopo) >= 0 ? this.state.nextCols : this.state.nextRows,
+      cols: this.state.nextCols,
       cell_size: (MAX_HEIGHT - (MAX_HEIGHT % this.state.nextRows)) / this.state.nextRows });
     let board = []
     for (let y = 0; y < this.state.rows; y++) {
@@ -232,9 +235,12 @@ class Game extends React.Component {
         board[y][x] = false;
       }
     }
-    this.board = board;
+    console.log("bd: ", board);
+    this.setState({ board: board })
+    console.log("Rows: ", this.state.rows);
+    console.log("Cols: ", this.state.cols);
+    console.log("Bd: ", this.state.board);
     this.setState({ cells: this.makeCells() });
-    console.log(this.board);
   }
   render() {
     const { cells } = this.state;
