@@ -112,7 +112,6 @@ class Game extends React.Component {
       for (let x = 0; x < this.state.cols; x++) {
         let neighbors = await this.calculateNeighbors(this.state.board, x, y);
         if (this.state.board[y][x]) {
-          console.log("x: ", x, "y: ", y, "n: ", neighbors)
           if (neighbors === 2 || neighbors === 3) {
             newBoard[y][x] = true;
           } else {
@@ -208,8 +207,8 @@ class Game extends React.Component {
   handleStepsChange = (event) => {
     this.setState({ steps: event.target.value })
   }
-  handleClear = () => {
-    const newBoard = this.makeEmptyBoard();
+  handleClear = async () => {
+    const newBoard = await this.makeEmptyBoard();
     this.setState({ board: newBoard })
     this.setState({ cells: this.makeCells() });
   };
@@ -235,11 +234,7 @@ class Game extends React.Component {
         board[y][x] = false;
       }
     }
-    console.log("bd: ", board);
     this.setState({ board: board })
-    console.log("Rows: ", this.state.rows);
-    console.log("Cols: ", this.state.cols);
-    console.log("Bd: ", this.state.board);
     this.setState({ cells: this.makeCells() });
   }
   render() {
@@ -265,7 +260,7 @@ class Game extends React.Component {
         <div className="controls">
           Speed:{" "}
           <input
-            value={1000/this.state.interval}
+            value={Math.round(1000/this.state.interval)}
             onChange={this.handleIntervalChange}
           />{" "}
           generations per second
