@@ -42,7 +42,7 @@ class Game extends React.Component {
     nextTopo: "default",
     nextRows: 40,
     nextCols: 40,
-    versions: 0,
+    gens: 0,
   };
   componentDidMount() {
     this.updateWindowDimensions();
@@ -134,7 +134,7 @@ class Game extends React.Component {
       }
     }
     await this.setState({ board: newBoard });
-    this.setState({ cells: this.makeCells() });
+    this.setState({ cells: this.makeCells(), gens: this.state.gens + 1 });
   };
   calculateNeighbors(board, x, y) {
     let neighbors = 0;
@@ -225,7 +225,7 @@ class Game extends React.Component {
   handleClear = async () => {
     const newBoard = await this.makeEmptyBoard();
     this.setState({ board: newBoard });
-    this.setState({ cells: this.makeCells() });
+    this.setState({ cells: this.makeCells(), gens: 0 });
   };
   handleTopoChange = (event) => {
     this.setState({ nextTopo: event.target.value });
@@ -252,7 +252,7 @@ class Game extends React.Component {
       }
     }
     await this.setState({ board: board });
-    this.setState({ cells: this.makeCells() });
+    this.setState({ cells: this.makeCells(), gens: 0 });
   };
   render() {
     const { cells } = this.state;
@@ -309,6 +309,9 @@ class Game extends React.Component {
                 onChange={this.handleIntervalChange}
               />{" "}
               generations per second
+            </div>
+            <div>
+              {this.state.gens} generations run
             </div>
           </nav>
         </div>
