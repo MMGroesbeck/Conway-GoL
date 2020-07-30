@@ -308,7 +308,7 @@ class Game extends React.Component {
                 value={Math.round(1000 / this.state.interval)}
                 onChange={this.handleIntervalChange}
               />{" "}
-              generations per second
+              generations per second|
             </div>
             <div>
               {this.state.gens} generations run
