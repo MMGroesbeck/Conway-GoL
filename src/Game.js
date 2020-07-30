@@ -85,17 +85,19 @@ class Game extends React.Component {
     };
   }
   handleClick = (event) => {
-    const elemOffset = this.getElementOffset();
-    const offsetX = event.clientX - elemOffset.x;
-    const offsetY = event.clientY - elemOffset.y;
-    const x = Math.floor(offsetX / this.state.cell_size);
-    const y = Math.floor(offsetY / this.state.cell_size);
-    if (x >= 0 && x <= this.state.cols && y >= 0 && y <= this.state.rows) {
-      let newBoard = [...this.state.board];
-      newBoard[y][x] = !newBoard[y][x];
-      this.setState({ board: newBoard });
+    if (!this.state.isRunning) {
+      const elemOffset = this.getElementOffset();
+      const offsetX = event.clientX - elemOffset.x;
+      const offsetY = event.clientY - elemOffset.y;
+      const x = Math.floor(offsetX / this.state.cell_size);
+      const y = Math.floor(offsetY / this.state.cell_size);
+      if (x >= 0 && x <= this.state.cols && y >= 0 && y <= this.state.rows) {
+        let newBoard = [...this.state.board];
+        newBoard[y][x] = !newBoard[y][x];
+        this.setState({ board: newBoard });
+      }
+      this.setState({ cells: this.makeCells() });
     }
-    this.setState({ cells: this.makeCells() });
   };
   runGame = () => {
     this.setState({ isRunning: true });
@@ -114,7 +116,7 @@ class Game extends React.Component {
     this.timeoutHandler = window.setTimeout(() => {
       this.runIteration();
     }, this.state.interval);
-  }
+  };
   oneStep = async () => {
     let newBoard = this.makeEmptyBoard();
     for (let y = 0; y < this.state.rows; y++) {
@@ -283,11 +285,11 @@ class Game extends React.Component {
             |
             <div>
               take{""}
-              <input 
-                type="text" 
+              <input
+                type="text"
                 className="navinput"
-                style={{ height: "2rem"}}
-                value={this.state.steps} 
+                style={{ height: "2rem" }}
+                value={this.state.steps}
                 onChange={this.handleStepsChange}
               />
               steps:{" "}
@@ -301,7 +303,7 @@ class Game extends React.Component {
             </a>
             |
             <div>
-            speed:{" "}
+              speed:{" "}
               <input
                 className="navinput"
                 type="text"
@@ -310,9 +312,7 @@ class Game extends React.Component {
               />{" "}
               generations per second|
             </div>
-            <div>
-              {this.state.gens} generations run
-            </div>
+            <div>{this.state.gens} generations run</div>
           </nav>
         </div>
         <div
@@ -411,13 +411,15 @@ class Game extends React.Component {
             className="navinput"
             type="text"
             value={this.state.nextRows}
-            onChange={this.handleRowsChange} />
+            onChange={this.handleRowsChange}
+          />
           columns:{" "}
           <input
             className="navinput"
             type="text"
             value={this.state.nextCols}
-            onChange={this.handleColsChange} />
+            onChange={this.handleColsChange}
+          />
           <a href="javascript:;" role="button" onClick={newBoard}>
             new board
           </a>
@@ -425,7 +427,7 @@ class Game extends React.Component {
             <li>a dead cell with 3 live neighbors comes to life.</li>
             <li>a live cell with two or three live neighbors stays alive.</li>
             <li>all other cells remain or become dead.</li>
-        </ul>
+          </ul>
         </div>
       </div>
     );
