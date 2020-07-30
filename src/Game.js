@@ -421,6 +421,11 @@ class Game extends React.Component {
           <a href="javascript:;" role="button" onClick={newBoard}>
             new board
           </a>
+          <ul>
+            <li>a dead cell with 3 live neighbors comes to life.</li>
+            <li>a live cell with two or three live neighbors stays alive.</li>
+            <li>all other cells remain or become dead.</li>
+        </ul>
         </div>
       </div>
     );
