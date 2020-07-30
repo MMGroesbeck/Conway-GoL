@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import "./Game.css";
+import { findByLabelText } from "@testing-library/react";
 
 const MAX_HEIGHT = 500;
 
@@ -107,9 +108,9 @@ class Game extends React.Component {
       this.timeoutHandler = null;
     }
   };
-  runIteration() {
+  runIteration = async () => {
     console.log("running iteration");
-    this.oneStep();
+    await this.oneStep();
     this.timeoutHandler = window.setTimeout(() => {
       this.runIteration();
     }, this.state.interval);
@@ -132,7 +133,7 @@ class Game extends React.Component {
         }
       }
     }
-    this.setState({ board: newBoard });
+    await this.setState({ board: newBoard });
     this.setState({ cells: this.makeCells() });
   };
   calculateNeighbors(board, x, y) {
