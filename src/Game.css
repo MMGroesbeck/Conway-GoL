@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond&family=Montserrat&display=swap');
 
+@font-face {
+    font-family: 'EB Garamond';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/ebgaramond/v14/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-6_RkBI9_.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 .Board {  
     position: relative;  
     margin: 0 auto;  
@@ -27,11 +36,14 @@
     align-items: flex-end;
     justify-content: space-between;
 }
-.navbar h1 {
+h1 {
+    display: flex;
     font-family: "EB Garamond", serif;
-    white-space: nowrap;
     font-size: 2.4rem;
     padding: 0.5%;
+    font-weight: normal;
+    white-space: nowrap;
+    margin: 0;
 }
 .navbar nav {
     display: flex;
@@ -40,6 +52,7 @@
     padding: 0.5%;
     color: silver;
     font-size: 2rem;
+    font-weight: normal;
     font-family: "Montserrat", sans-serif;
 }
 .navbar nav a {
@@ -57,7 +70,7 @@
 }
 /* For topology/new-board controls: */
 .footer {
-    max-width: 80%;
+    max-width: 60%;
     position: fixed;
     margin: 0 auto;
     left: 0;
