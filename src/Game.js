@@ -267,16 +267,16 @@ class Game extends React.Component {
           <h1>Conway's Game of Life</h1>
           <nav>
             {this.state.isRunning ? (
-              <a role="button" onClick={stopGame}>
+              <a href="javascript:;" role="button" onClick={stopGame}>
                 stop
               </a>
             ) : (
-              <a role="button" onClick={runGame}>
+              <a href="javascript:;" role="button" onClick={runGame}>
                 run
               </a>
             )}
             |
-            <a role="button" onClick={oneStep}>
+            <a href="javascript:;" role="button" onClick={oneStep}>
               step
             </a>
             |
@@ -290,12 +290,12 @@ class Game extends React.Component {
                 onChange={this.handleStepsChange}
               />
               steps:{" "}
-              <a role="button" onClick={takeSteps}>
+              <a href="javascript:;" role="button" onClick={takeSteps}>
                 go
               </a>
             </div>
             |
-            <a role="button" onClick={handleClear}>
+            <a href="javascript:;" role="button" onClick={handleClear}>
               clear
             </a>
             |
@@ -414,7 +414,7 @@ class Game extends React.Component {
             type="text"
             value={this.state.nextCols}
             onChange={this.handleColsChange} />
-          <a role="button" onClick={newBoard}>
+          <a href="javascript:;" role="button" onClick={newBoard}>
             new board
           </a>
         </div>
