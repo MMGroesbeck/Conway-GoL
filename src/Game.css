@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond&family=Montserrat&display=swap');
+
 .Board {  
     position: relative;  
     margin: 0 auto;  
@@ -10,3 +12,72 @@
     position: absolute;
     background-image: radial-gradient(silver, gray)
 }
+/* For run/stop/step/speed controls: */
+.navbar {
+    max-width: 80%;
+    position: fixed;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 1;
+    background-color: #3c3c3c;
+    color: whitesmoke;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+.navbar h1 {
+    font-family: "EB Garamond", serif;
+    white-space: nowrap;
+    font-size: 2.4rem;
+    padding: 0.5%;
+}
+.navbar nav {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    padding: 0.5%;
+    color: silver;
+    font-size: 2rem;
+    font-family: "Montserrat", sans-serif;
+}
+.navbar nav a {
+    text-decoration: none;
+    color: whitesmoke;
+    cursor: pointer;
+  }
+.navbar nav a:hover {
+    color: silver;
+    border: 1px solid #1e1e1e;
+}
+.navinput {
+    height: 2rem;
+    width: 4rem;
+}
+/* For topology/new-board controls: */
+.footer {
+    max-width: 80%;
+    position: fixed;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.8rem;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    background-color: silver;
+    color: #282828;
+    font-size: 1.2rem;
+    font-family: "Montserrat", sans-serif;
+  }
+  .footer a {
+    text-decoration: none;
+    color: dimgray;
+    cursor: pointer;
+  }
+  .footer a:hover {
+    border: 1px solid #1e1e1e;
+  }

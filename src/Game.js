@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./Game.css";
 
-const MAX_HEIGHT = 600
+const MAX_HEIGHT = 500;
 
 class Cell extends React.Component {
   render() {
@@ -24,7 +24,8 @@ class Game extends React.Component {
     super();
     this.rows = 40;
     this.cols = 40;
-    this.cell_size = (MAX_HEIGHT - (MAX_HEIGHT % this.rows)) / this.rows
+    this.cell_size = (MAX_HEIGHT - (MAX_HEIGHT % this.rows)) / this.rows;
+    this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
     this.board = this.makeEmptyBoard();
   }
   state = {
@@ -39,8 +40,20 @@ class Game extends React.Component {
     topology: "default",
     nextTopo: "default",
     nextRows: 40,
-    nextCols: 40
+    nextCols: 40,
+    versions: 0,
   };
+  componentDidMount() {
+    this.updateWindowDimensions();
+    window.addEventListener("resize", this.updateWindowDimensions);
+    this.newBoard();
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.updateWindowDimensions);
+  }
+  updateWindowDimensions() {
+    this.setState({ width: window.innerWidth, height: window.innerHeight });
+  }
   makeEmptyBoard() {
     let board = [];
     for (let y = 0; y < this.state.rows; y++) {
@@ -76,8 +89,8 @@ class Game extends React.Component {
     const offsetY = event.clientY - elemOffset.y;
     const x = Math.floor(offsetX / this.state.cell_size);
     const y = Math.floor(offsetY / this.state.cell_size);
-    if ((x >= 0) && (x <= this.state.cols) && (y >= 0) && (y <= this.state.rows)) {
-      let newBoard = [...this.state.board]
+    if (x >= 0 && x <= this.state.cols && y >= 0 && y <= this.state.rows) {
+      let newBoard = [...this.state.board];
       newBoard[y][x] = !newBoard[y][x];
       this.setState({ board: newBoard });
     }
@@ -121,7 +134,7 @@ class Game extends React.Component {
     }
     this.setState({ board: newBoard });
     this.setState({ cells: this.makeCells() });
-  }
+  };
   calculateNeighbors(board, x, y) {
     let neighbors = 0;
     const dirs = [
@@ -134,65 +147,65 @@ class Game extends React.Component {
       [1, -1],
       [0, -1],
     ];
-    dirs.forEach(coord => {
-      let y1 = y + coord[0]
-      let x1 = x + coord[1]
+    dirs.forEach((coord) => {
+      let y1 = y + coord[0];
+      let x1 = x + coord[1];
       // Adjust x-axis topology:
-      switch(this.state.topology){
+      switch (this.state.topology) {
         case "cylinder":
         case "torus":
         case "klein":
-          if (x1<0){
+          if (x1 < 0) {
             x1 = this.state.cols - 1;
           }
-          if (x1>=this.state.cols) {
+          if (x1 >= this.state.cols) {
             x1 = 0;
           }
           break;
         case "mobius":
         case "rpp":
-          if (x1<0){
-            x1 = this.state.cols -1;
-            y1 = this.state.rows - y1 -1;
+          if (x1 < 0) {
+            x1 = this.state.cols - 1;
+            y1 = this.state.rows - y1 - 1;
           }
-          if (x1>=this.state.cols) {
+          if (x1 >= this.state.cols) {
             x1 = 0;
-            y1 = this.state.rows -y1 -1;
+            y1 = this.state.rows - y1 - 1;
           }
           break;
         default:
           break;
       }
       // Adjust y-axis topology:
-      switch(this.state.topology){
+      switch (this.state.topology) {
         case "torus":
-          if (y1<0){
+          if (y1 < 0) {
             y1 = this.state.rows - 1;
           }
-          if (y1>=this.state.rows) {
+          if (y1 >= this.state.rows) {
             y1 = 0;
           }
           break;
         case "klein":
         case "rpp":
-          if (y1<0){
-            y1 = this.state.rows -1;
-            x1 = this.state.cols - x1 -1;
+          if (y1 < 0) {
+            y1 = this.state.rows - 1;
+            x1 = this.state.cols - x1 - 1;
           }
-          if (y1>=this.state.rows) {
+          if (y1 >= this.state.rows) {
             y1 = 0;
-            x1 = this.state.rows -x1 -1;
+            x1 = this.state.rows - x1 - 1;
           }
           break;
         default:
           break;
       }
-      if(x1 >= 0 && y1 >= 0 && x1 < this.state.cols && y1 < this.state.rows) {
-        if (board[y1][x1]===true){
+      if (x1 >= 0 && y1 >= 0 && x1 < this.state.cols && y1 < this.state.rows) {
+        if (board[y1][x1] === true) {
           neighbors++;
         }
       }
-    })
+    });
     return neighbors;
   }
   takeSteps = async () => {
@@ -201,47 +214,103 @@ class Game extends React.Component {
       console.log(i);
       await this.oneStep();
     }
-  }
+  };
   handleIntervalChange = (event) => {
-    this.setState({ interval: 1000/event.target.value });
+    this.setState({ interval: 1000 / event.target.value });
   };
   handleStepsChange = (event) => {
-    this.setState({ steps: event.target.value })
-  }
+    this.setState({ steps: event.target.value });
+  };
   handleClear = async () => {
     const newBoard = await this.makeEmptyBoard();
-    this.setState({ board: newBoard })
+    this.setState({ board: newBoard });
     this.setState({ cells: this.makeCells() });
   };
   handleTopoChange = (event) => {
-    this.setState({ nextTopo: event.target.value})
-  }
+    this.setState({ nextTopo: event.target.value });
+  };
   handleRowsChange = (event) => {
-    this.setState({ nextRows: event.target.value})
-  }
+    this.setState({ nextRows: event.target.value });
+  };
   handleColsChange = (event) => {
-    this.setState({ nextCols: event.target.value})
-  }
+    this.setState({ nextCols: event.target.value });
+  };
   newBoard = async () => {
     await this.setState({
       topology: this.state.nextTopo,
       rows: this.state.nextRows,
       cols: this.state.nextCols,
-      cell_size: (MAX_HEIGHT - (MAX_HEIGHT % this.state.nextRows)) / this.state.nextRows });
-    let board = []
+      cell_size:
+        (MAX_HEIGHT - (MAX_HEIGHT % this.state.nextRows)) / this.state.nextRows,
+    });
+    let board = [];
     for (let y = 0; y < this.state.rows; y++) {
       board[y] = [];
       for (let x = 0; x < this.state.cols; x++) {
         board[y][x] = false;
       }
     }
-    this.setState({ board: board })
+    await this.setState({ board: board });
     this.setState({ cells: this.makeCells() });
-  }
+  };
   render() {
     const { cells } = this.state;
+    let runGame = this.runGame;
+    let stopGame = this.stopGame;
+    let oneStep = this.oneStep;
+    let takeSteps = this.takeSteps;
+    let handleClear = this.handleClear;
+    let newBoard = this.newBoard;
     return (
       <div>
+        <div class="navbar">
+          <h1>Conway's Game of Life</h1>
+          <nav>
+            {this.state.isRunning ? (
+              <a role="button" onClick={stopGame}>
+                stop
+              </a>
+            ) : (
+              <a role="button" onClick={runGame}>
+                run
+              </a>
+            )}
+            |
+            <a role="button" onClick={oneStep}>
+              step
+            </a>
+            |
+            <div>
+              take{""}
+              <input 
+                type="text" 
+                className="navinput"
+                style={{ height: "2rem"}}
+                value={this.state.steps} 
+                onChange={this.handleStepsChange}
+              />
+              steps:{" "}
+              <a role="button" onClick={takeSteps}>
+                go
+              </a>
+            </div>
+            |
+            <a role="button" onClick={handleClear}>
+              clear
+            </a>
+            |
+            <div>
+            speed:{" "}
+              <input
+                className="navinput"
+                type="text"
+                value={Math.round(1000 / this.state.interval)}
+                onChange={this.handleIntervalChange}
+              />{" "}
+              generations per second
+            </div>
+          </nav>
+        </div>
         <div
           className="Board"
           style={{
@@ -255,100 +324,99 @@ class Game extends React.Component {
           }}
         >
           {cells.map((cell) => (
-            <Cell cell_size={this.state.cell_size} x={cell.x} y={cell.y} key={`${cell.x},${cell.y}`} />
+            <Cell
+              cell_size={this.state.cell_size}
+              x={cell.x}
+              y={cell.y}
+              key={`${cell.x},${cell.y}`}
+            />
           ))}
         </div>
-        <div className="controls">
-          Speed:{" "}
-          <input
-            value={Math.round(1000/this.state.interval)}
-            onChange={this.handleIntervalChange}
-          />{" "}
-          generations per second
-          {this.state.isRunning ? (
-            <button className="button" onClick={this.stopGame}>
-              Stop
-            </button>
-          ) : (
-            <button className="button" onClick={this.runGame}>
-              Run
-            </button>
-          )}
-          <button className="button" onClick={this.handleClear}>
-            Clear
-          </button>
-          <button className="button" onClick={this.oneStep}>
-            Step
-          </button>
-          Take{""}
-          <input
-            value={this.state.steps}
-            onChange={this.handleStepsChange}
-          />
-          steps:
-          <button className="button" onClick={this.takeSteps}>
-            Go
-          </button>
-        </div>
-        <div className="controls">
-          Topology:
+        <div className="footer">
+          topology:
           <form>
             <div className="radio">
               <label>
-                <input type="radio" value="default" checked={this.state.nextTopo === "default"}
-                  onChange={this.handleTopoChange} />
+                <input
+                  type="radio"
+                  value="default"
+                  checked={this.state.nextTopo === "default"}
+                  onChange={this.handleTopoChange}
+                />
                 default
               </label>
             </div>
             <div className="radio">
               <label>
-                <input type="radio" value="cylinder" checked={this.state.nextTopo === "cylinder"}
-                  onChange={this.handleTopoChange} />
+                <input
+                  type="radio"
+                  value="cylinder"
+                  checked={this.state.nextTopo === "cylinder"}
+                  onChange={this.handleTopoChange}
+                />
                 cylinder
               </label>
             </div>
             <div className="radio">
               <label>
-                <input type="radio" value="mobius" checked={this.state.nextTopo === "mobius"} 
-                  onChange={this.handleTopoChange}/>
+                <input
+                  type="radio"
+                  value="mobius"
+                  checked={this.state.nextTopo === "mobius"}
+                  onChange={this.handleTopoChange}
+                />
                 Möbius band
               </label>
             </div>
             <div className="radio">
               <label>
-                <input type="radio" value="torus" checked={this.state.nextTopo === "torus"} 
-                  onChange={this.handleTopoChange}/>
+                <input
+                  type="radio"
+                  value="torus"
+                  checked={this.state.nextTopo === "torus"}
+                  onChange={this.handleTopoChange}
+                />
                 torus
               </label>
             </div>
             <div className="radio">
               <label>
-                <input type="radio" value="klein" checked={this.state.nextTopo === "klein"} 
-                  onChange={this.handleTopoChange}/>
+                <input
+                  type="radio"
+                  value="klein"
+                  checked={this.state.nextTopo === "klein"}
+                  onChange={this.handleTopoChange}
+                />
                 Klein bottle
               </label>
             </div>
             <div className="radio">
               <label>
-                <input type="radio" value="rpp" checked={this.state.nextTopo === "rpp"} 
-                  onChange={this.handleTopoChange}/>
+                <input
+                  type="radio"
+                  value="rpp"
+                  checked={this.state.nextTopo === "rpp"}
+                  onChange={this.handleTopoChange}
+                />
                 real projective plane
               </label>
             </div>
           </form>
-          Rows:{" "}
+          rows:{" "}
           <input
+            className="navinput"
+            type="text"
             value={this.state.nextRows}
-            onChange={this.handleRowsChange}
-          />
-          Columns:{" "}
+            onChange={this.handleRowsChange} />
+          columns:{" "}
           <input
+            className="navinput"
+            type="text"
             value={this.state.nextCols}
-            onChange={this.handleColsChange}
-          />
-          <button className="button" onClick={this.newBoard}>
-            New board
-          </button>
+            onChange={this.handleColsChange} />
+          <a role="button" onClick={newBoard}>
+            new board
+          </a>
         </div>
       </div>
     );
