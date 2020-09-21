@@ -1,5 +1,5 @@
 # Conway-GoL
-React implementation of Conway's Game of Life
+React implementation of Conway's Game of Life with size and topology controls.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
